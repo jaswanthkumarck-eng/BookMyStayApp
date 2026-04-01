@@ -52,14 +52,14 @@ class SuiteRoom extends Room {
     }
 }
 
-// UC3: Centralized Inventory using HashMap
+// Inventory (from UC3)
 class RoomInventory {
     private Map<String, Integer> inventory;
 
     public RoomInventory() {
         inventory = new HashMap<>();
         inventory.put("Single", 5);
-        inventory.put("Double", 3);
+        inventory.put("Double", 0); // unavailable
         inventory.put("Suite", 2);
     }
 
@@ -67,14 +67,27 @@ class RoomInventory {
         return inventory.getOrDefault(type, 0);
     }
 
-    public void updateAvailability(String type, int count) {
-        inventory.put(type, count);
+    public Map<String, Integer> getAllInventory() {
+        return inventory;
     }
+}
 
-    public void displayInventory() {
-        System.out.println("=== Room Inventory (v3.0) ===");
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " Rooms Available: " + entry.getValue());
+// UC4: Search Service (Read-only)
+class RoomSearchService {
+
+    public void searchAvailableRooms(Room[] rooms, RoomInventory inventory) {
+
+        System.out.println("=== Available Rooms (v4.0) ===\n");
+
+        for (Room room : rooms) {
+            String type = room.getType();
+            int available = inventory.getAvailability(type);
+
+            if (available > 0) { // filter unavailable rooms
+                room.displayDetails();
+                System.out.println("Available: " + available);
+                System.out.println("--------------------------------");
+            }
         }
     }
 }
@@ -83,26 +96,19 @@ public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        Room r1 = new SingleRoom(101);
-        Room r2 = new DoubleRoom(102);
-        Room r3 = new SuiteRoom(103);
+        Room[] rooms = {
+                new SingleRoom(101),
+                new DoubleRoom(102),
+                new SuiteRoom(103)
+        };
 
         RoomInventory inventory = new RoomInventory();
 
-        System.out.println("=== BookMyStayApp v3.0 ===\n");
+        RoomSearchService searchService = new RoomSearchService();
 
-        r1.displayDetails();
-        System.out.println("Available: " + inventory.getAvailability("Single"));
-        System.out.println();
+        System.out.println("=== BookMyStayApp v4.0 ===\n");
 
-        r2.displayDetails();
-        System.out.println("Available: " + inventory.getAvailability("Double"));
-        System.out.println();
-
-        r3.displayDetails();
-        System.out.println("Available: " + inventory.getAvailability("Suite"));
-        System.out.println();
-
-        inventory.displayInventory();
+        // Perform search (read-only)
+        searchService.searchAvailableRooms(rooms, inventory);
     }
 }
